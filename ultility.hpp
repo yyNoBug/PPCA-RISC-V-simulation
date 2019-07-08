@@ -21,6 +21,7 @@ int link(int a, int la, int b, int lb, int c, int lc, int d, int ld) {
 	return (((((a << lb) | b) << lc) | c) << ld) | d;
 }
 
+/*
 struct binaryString {
 
 	int val;
@@ -74,6 +75,7 @@ int convertBinary(bool* str, int size) {
 	}
 	return s;
 }
+*/
 
 
 #endif // !ULTILITY

@@ -14,10 +14,6 @@ public:
 	virtual void getreg() {
 		return;
 	}
-
-	virtual void run() {
-
-	}
 };
 
 class _com_R : public _com {
@@ -38,8 +34,8 @@ public:
 		DX_B = x[rs2];
 		DX_NPC = FD_NPC;
 		DX_IR = FD_IR;
-		DX_Imm = 0;
-		DX_Type = type;
+		DX_IMM = 0;
+		DX_TYPE = type;
 	}
 };
 
@@ -60,8 +56,8 @@ public:
 		DX_B = 0;
 		DX_NPC = FD_NPC;
 		DX_IR = FD_IR;
-		DX_Imm = imm;
-		DX_Type = type;
+		DX_IMM = imm;
+		DX_TYPE = type;
 	}
 };
 
@@ -82,8 +78,8 @@ public:
 		DX_B = x[rs2];
 		DX_NPC = FD_NPC;
 		DX_IR = FD_IR;
-		DX_Imm = imm;
-		DX_Type = type;
+		DX_IMM = imm;
+		DX_TYPE = type;
 	}
 };
 
@@ -105,8 +101,8 @@ public:
 		DX_B = x[rs2];
 		DX_NPC = FD_NPC;
 		DX_IR = FD_IR;
-		DX_Imm = imm;
-		DX_Type = type;
+		DX_IMM = imm;
+		DX_TYPE = type;
 	}
 };
 
@@ -126,8 +122,8 @@ public:
 		DX_B = 0;
 		DX_NPC = FD_NPC;
 		DX_IR = FD_IR;
-		DX_Imm = imm;
-		DX_Type = type;
+		DX_IMM = imm;
+		DX_TYPE = type;
 	}
 };
 
@@ -147,8 +143,8 @@ public:
 		DX_B = 0;
 		DX_NPC = FD_NPC;
 		DX_IR = FD_IR;
-		DX_Imm = imm;
-		DX_Type = type;
+		DX_IMM = imm;
+		DX_TYPE = type;
 	}
 };
 

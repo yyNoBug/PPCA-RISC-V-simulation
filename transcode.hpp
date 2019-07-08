@@ -6,16 +6,16 @@
 #include "ultility.hpp"
 #include "register.hpp"
 
-_com* transcode() {
-	int cur = FD_IR;
+_com* transcode(int cur) {
 	int opcode = get(0, 6, cur);
+	int funct3, funct7;
 	switch (opcode) {
 	case 0b0110111: return new _com_U(cur, LUI);
 	case 0b0010111: return new _com_U(cur, AUIPC);
 	case 0b1101111: return new _com_UJ(cur, JAL);
 	case 0b1100111: return new _com_I(cur, JALR);
 	case 0b0000011:
-		int funct3 = get(12, 14, cur);
+		funct3 = get(12, 14, cur);
 		switch (funct3) {
 		case 0b000: return new _com_I(cur, LB);
 		case 0b001: return new _com_I(cur, LH);
@@ -24,7 +24,7 @@ _com* transcode() {
 		case 0b101: return new _com_I(cur, LHU);
 		}
 	case 0b1100011:
-		int funct3 = get(12, 14, cur);
+		funct3 = get(12, 14, cur);
 		switch (funct3) {
 		case 0b000: return new _com_SB(cur, BEQ);
 		case 0b001: return new _com_SB(cur, BNE);
@@ -34,17 +34,17 @@ _com* transcode() {
 		case 0b111: return new _com_SB(cur, BGEU);
 		}
 	case 0b0100011:
-		int funct3 = get(12, 14, cur);
+		funct3 = get(12, 14, cur);
 		switch (funct3) {
 		case 0b000: return new _com_S(cur, SB);
 		case 0b001: return new _com_S(cur, SH);
 		case 0b010: return new _com_S(cur, SW);
 		}
 	case 0b0110011:
-		int funct3 = get(12, 14, cur);
+		funct3 = get(12, 14, cur);
 		switch (funct3) {
 		case 0b000:
-			int funct7 = get(25, 31, cur);
+			funct7 = get(25, 31, cur);
 			switch (funct7) {
 			case 0b0000000: return new _com_R(cur, ADD);
 			case 0b0100000: return new _com_R(cur, SUB);
@@ -54,7 +54,7 @@ _com* transcode() {
 		case 0b011: return new _com_R(cur, SLTU);
 		case 0b100: return new _com_R(cur, XOR);
 		case 0b101:
-			int funct7 = get(25, 31, cur);
+			funct7 = get(25, 31, cur);
 			switch (funct7) {
 			case 0b0000000: return new _com_R(cur, SRL);
 			case 0b0100000: return new _com_R(cur, SRA);
@@ -64,7 +64,7 @@ _com* transcode() {
 
 		}
 	case 0b0010011:
-		int funct3 = get(12, 14, cur);
+		funct3 = get(12, 14, cur);
 		switch (funct3) {
 		case 0b000: return new _com_I(cur, ADDI);
 		case 0b010: return new _com_I(cur, SLTI);
@@ -74,7 +74,7 @@ _com* transcode() {
 		case 0b111: return new _com_I(cur, ANDI);
 		case 0b001: return new _com_I(cur, SLLI);
 		case 0b101:
-			int funct7 = get(25, 31, cur);
+			funct7 = get(25, 31, cur);
 			switch (funct7) {
 			case 0b0000000: return new _com_I(cur, SRLI);
 			case 0b0100000: return new _com_I(cur, SRAI);

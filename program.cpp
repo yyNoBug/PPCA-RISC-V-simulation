@@ -3,150 +3,109 @@
 #include <cstring>
 #include <cmath>
 #include <vector>
-#include "ultility.hpp"
-#include "command.hpp"
-#include "transcode.hpp"
 #include "register.hpp"
+#include "ultility.hpp"
+#include "transcode.hpp"
+#include "excecution.hpp"
 
-char command[0x20000];
+unsigned char memory[0x20000];
+bool stop;
 
 void IF() {
-	int a4 = command[pc];
-	int a3 = command[pc + 1];
-	int a2 = command[pc + 2];
-	int a1 = command[pc + 3];
+	int a4 = memory[pc];
+	int a3 = memory[pc + 1];
+	int a2 = memory[pc + 2];
+	int a1 = memory[pc + 3];
 	FD_IR = link(a1, 4, a2, 4, a3, 4, a4, 4);
 
-	/* lack some operations regarding PC */
 	pc = pc + 4;
 	FD_NPC = pc;
 }
 
 
 void ID() {
-	_com* x = transcode();
+	int ir = FD_IR;
+	
+	_com* x = transcode(ir);
 	x->getreg(); 
 	delete x;
 
+	DX_IR = FD_IR;
 	DX_NPC = FD_NPC;
 }
 
 void EX() {
-	XM_IR = DX_IR;
-
-	int typeofcode = DX_Type;
+	int type = DX_TYPE;
 	int _vala = DX_A;
 	int _valb = DX_B;
-	int rd = get(7, 11, DX_IR);  //there may be problems
-	int imm = DX_Imm;
-	switch (typeofcode) {
-	case 0: //ADDI
-		XM_AO = _vala + imm;
-		break;
-	case 1: //SLTI
-		if (_vala < imm) XM_AO = 1;
-		else XM_AO = 0;
-		break;
-	case 2: //SLTIU
-		if ((unsigned int)_vala < (unsigned int)imm) XM_AO = 1;
-		else XM_AO = 0;
-		break;
-	case 3: //ANDI
-		XM_AO = imm & _vala;
-		break;
-	case 4: //ORI
-		XM_AO = imm | _vala;
-		break;
-	case 5: //XORI
-		XM_AO = imm ^ _vala;
-		break;
-	case 6: //SLLI
-		int shift = get(0, 4, imm);
-		XM_AO = ((unsigned int)_vala) << shift;
-		break;
-	case 7: //SRLI
-		int shift = get(0, 4, imm);
-		XM_AO = ((unsigned int)_vala) >> shift;
-		break;
-	case 8: //SRAI
-		int shift = get(0, 4, imm);
-		XM_AO = _vala >> shift;
-		break;
-	case 9: 
-	case 10:
-	case 11:
-	case 12:
-	case 13:
-	case 14:
-	case 15: //LUI
-		XM_AO = imm;
-		break;
-	case 16: //AUIPC
-		XM_AO = DX_NPC + imm;
-		XM_CD = (_vala == 0);
-		//not quite sure
-	case 17: //ADD
-		XM_AO = _vala + _valb;
-		break;
-	case 18: //SLT
-		if (_vala < _valb) XM_AO = 1;
-		else XM_AO = 0;
-		break;
-	case 19: //SLTU
-		if ((unsigned int)_vala < (unsigned int)_valb) XM_AO = 1;
-		else XM_AO = 0;
-		break;
-	case 20: //AND
-		XM_AO = _vala & _valb;
-		break;
-	case 21: //OR
-		XM_AO = _vala | _valb;
-		break;
-	case 22: //XOR
-		XM_AO = _vala ^ _valb;
-		break;
-	case 23: //SLL
-		XM_AO = _vala << _valb;
-		break;
-	case 24: //SRL
-		XM_AO = (unsigned int)_vala >> (unsigned int)_valb;
-		break;
-	case 25: //SUB
-		XM_AO = _vala - _valb;
-		break;
-	case 26: //SRA
-		XM_AO = _vala >> _valb;
-		break;
-	case 27: //JAL
-		//problems may occur
-		XM_AO = DX_NPC + imm;
-		
-	case 28: //
-	case 29: 
-	case 30:
-	case 31:
-	case 32:
-	case 33:
-	case 34:
-	case 35:
-	case 36:
-	}
+	int imm = DX_IMM;
+	int npc = DX_NPC;
+	
+	excecute(_vala, _valb, imm, npc, type);
+	XM_IR = DX_IR;
+	XM_TYPE = DX_TYPE;
 }
 
 void MEM() {
+	int type = XM_TYPE;
+	int ao = XM_AO;
+	int npc = XM_NPC;
 
+	switch (type) {
+	case 0: case 1: case 2: case 3: case 4:
+	case 5: case 6: case 7: case 8: case 16:
+	case 17: case 18: case 19: case 20: case 21:
+	case 22: case 23: case 24: case 25: case 26:
+		MB_AO = ao;
+		break;
+	case 10: case 11: case 12: case 13: case 14: case 15:
+		MB_LMD = memory[ao];
+		break;
+	case 34: case 35: case 36:
+		memory[ao] = XM_B;
+		break;
+	case 9: case 27: case 28: case 29:
+	case 30: case 31: case 32: case 33:
+		MB_AO = ao;
+		MB_NPC = npc;
+		break;
+	}
+	
+	MB_IR = XM_IR;
+	MB_TYPE = XM_TYPE;
 }
 
 void WB() {
-
+	int type = MB_TYPE;
+	int ir = MB_IR;
+	int ao = MB_AO;
+	int npc = MB_NPC;
+	
+	int rd;
+	switch (type) {
+	case 0: case 1: case 2: case 3: case 4:
+	case 5: case 6: case 7: case 8: case 16:
+	case 17: case 18: case 19: case 20: case 21:
+	case 22: case 23: case 24: case 25: case 26:
+		rd = get(7, 11, ir);
+		x[rd] = ao;
+		break;
+	case 10: case 11: case 12: case 13: case 14: case 15:
+		rd = get(7, 11, ir);
+		x[rd] = ao;
+		break;
+	case 34: case 35: case 36:
+		break;
+	case 9: case 27: case 28: case 29:
+	case 30: case 31: case 32: case 33:
+		break;
+	}
 }
-
-
 
 int getChar() {
 	while (1) {
 		char c = getchar();
-		if (c >= '0' && c >= '9') return c - '0';
+		if (c >= '0' && c <= '9') return c - '0';
 		if (c >= 'A' && c <= 'F') return c - 'A' + 10;
 		if (c == '@') return 16;
 		if (c == EOF) return -1;
@@ -167,13 +126,22 @@ void fetch() {
 		int loc; scanf("%x", &loc);
 		while (1) {
 			lab = get0x(); if (lab == 16) continue; if (lab == -1) return;
-			command[loc++] = lab;
+			memory[loc++] = lab;
 		}
 	}
 }
 
 int main() {
+	fetch();
 
-
-
+	stop = false;
+	while (!stop) {
+		IF();
+		ID();
+		EX();
+		MEM();
+		WB();
+	}
+	std::cout << ((unsigned int)x[10] & 0b11111111);
+	//may cause problems
 }
