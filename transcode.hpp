@@ -4,7 +4,7 @@
 #include "enum.hpp"
 #include "command.hpp"
 #include "ultility.hpp"
-#include "register.hpp"
+#include "storage.hpp"
 
 _com* transcode(int cur) {
 	int opcode = get(0, 6, cur);

@@ -32,8 +32,6 @@ public:
 	virtual void getreg() {
 		DX_A = x[rs1];
 		DX_B = x[rs2];
-		DX_NPC = FD_NPC;
-		DX_IR = FD_IR;
 		DX_IMM = 0;
 		DX_TYPE = type;
 	}
@@ -54,8 +52,6 @@ public:
 	virtual void getreg() {
 		DX_A = x[rs1];
 		DX_B = 0;
-		DX_NPC = FD_NPC;
-		DX_IR = FD_IR;
 		DX_IMM = imm;
 		DX_TYPE = type;
 	}
@@ -76,8 +72,6 @@ public:
 	virtual void getreg() {
 		DX_A = x[rs1];
 		DX_B = x[rs2];
-		DX_NPC = FD_NPC;
-		DX_IR = FD_IR;
 		DX_IMM = imm;
 		DX_TYPE = type;
 	}
@@ -99,8 +93,6 @@ public:
 	virtual void getreg() {
 		DX_A = x[rs1];
 		DX_B = x[rs2];
-		DX_NPC = FD_NPC;
-		DX_IR = FD_IR;
 		DX_IMM = imm;
 		DX_TYPE = type;
 	}
@@ -120,8 +112,6 @@ public:
 	virtual void getreg() {
 		DX_A = 0;
 		DX_B = 0;
-		DX_NPC = FD_NPC;
-		DX_IR = FD_IR;
 		DX_IMM = imm;
 		DX_TYPE = type;
 	}
@@ -141,8 +131,6 @@ public:
 	virtual void getreg() {
 		DX_A = 0;
 		DX_B = 0;
-		DX_NPC = FD_NPC;
-		DX_IR = FD_IR;
 		DX_IMM = imm;
 		DX_TYPE = type;
 	}

@@ -1,7 +1,7 @@
 #ifndef EXCECUTION
 #define EXCECUTION
 
-#include "register.hpp"
+#include "storage.hpp"
 #include "ultility.hpp"
 
 void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
@@ -43,9 +43,9 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 		XM_AO = _vala >> shift;
 		break;
 	case 9: //JALR
-		XM_AO = XM_NPC + 4;
-		XM_NPC = _vala + imm;
-		//add something
+		XM_AO = npc;
+		XM_NPC = (_vala + imm) & (-2);
+		XM_CD = 1;
 		break;
 	case 10: //LW
 		XM_AO = _vala + imm;
@@ -66,7 +66,7 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 		XM_AO = imm;
 		break;
 	case 16: //AUIPC
-		XM_AO = npc + imm;
+		XM_AO = npc - 4 + imm;
 		break;
 	case 17: //ADD
 		XM_AO = _vala + _valb;
@@ -101,46 +101,62 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 		XM_AO = _vala >> _valb;
 		break;
 	case 27: //JAL
-		//problems may occur
-		XM_AO = XM_NPC + 4;
-		XM_NPC = DX_NPC + imm;
-		XM_CD = (_vala == 0); // NOTE HERE: I KNOW NOTHING ABOUT THIS STATEMENT
+		XM_AO = npc;
+		XM_NPC = npc + imm - 4;
+		XM_CD = 1;
 		break;
 	case 28: //BEQ
 		if (_vala == _valb) {
-			XM_AO = XM_NPC + 4;//may not be needed
-			XM_NPC = DX_NPC + imm;
+			XM_NPC = npc + imm - 4;
+			XM_CD = 1;
+		}
+		else {
+			XM_CD = 0;
 		}
 		break;
-		// not sure
 	case 29: //BNE
 		if (_vala != _valb) {
-			XM_AO = XM_NPC + 4;
-			XM_NPC = DX_NPC + imm;
+			XM_NPC = npc + imm - 4;
+			XM_CD = 1;
+		}
+		else {
+			XM_CD = 0;
 		}
 		break;
 	case 30: //BLT
 		if (_vala < _valb) {
-			XM_AO = XM_NPC + 4;
-			XM_NPC = DX_NPC + imm;
+			XM_NPC = npc + imm - 4;
+			XM_CD = 1;
+		}
+		else {
+			XM_CD = 0;
 		}
 		break;
 	case 31: //BLTU
 		if ((unsigned int)_vala < (unsigned int)_valb) {
-			XM_AO = XM_NPC + 4;
-			XM_NPC = DX_NPC + imm;
+			XM_NPC = npc + imm - 4;
+			XM_CD = 1;
+		}
+		else {
+			XM_CD = 0;
 		}
 		break;
 	case 32: //BGE
 		if (_vala >= _valb) {
-			XM_AO = XM_NPC + 4;
-			XM_NPC = DX_NPC + imm;
+			XM_NPC = npc + imm - 4;
+			XM_CD = 1;
+		}
+		else {
+			XM_CD = 0;
 		}
 		break;
 	case 33: //BGEU
 		if ((unsigned int)_vala >= (unsigned int)_valb) {
-			XM_AO = XM_NPC + 4;
-			XM_NPC = DX_NPC + imm;
+			XM_NPC = npc + imm - 4;
+			XM_CD = 1;
+		}
+		else {
+			XM_CD = 0;
 		}
 		break;
 	case 34: //SW

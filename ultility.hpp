@@ -10,15 +10,15 @@ int get(int l, int r, int num) {   //0-base
 }
 
 int link(int a, int la, int b, int lb) {
-	return (a << lb) | b;
+	return (((a << lb) | b) << (32 - la - lb)) >> (32 - la - lb);
 }
 
 int link(int a, int la, int b, int lb, int c, int lc) {
-	return (((a << lb) | b ) << lc) | c;
+	return (((((a << lb) | b ) << lc) | c) << (32 - la - lb - lc)) >> (32 - la - lb - lc);
 }
 
 int link(int a, int la, int b, int lb, int c, int lc, int d, int ld) {
-	return (((((a << lb) | b) << lc) | c) << ld) | d;
+	return (((((((a << lb) | b) << lc) | c) << ld) | d) << (32 - la - lb - lc - ld)) >> (32 - la - lb - lc - ld);
 }
 
 /*

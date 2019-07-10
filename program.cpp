@@ -3,20 +3,41 @@
 #include <cstring>
 #include <cmath>
 #include <vector>
-#include "register.hpp"
+#include <windows.h>
+#include "storage.hpp"
 #include "ultility.hpp"
 #include "transcode.hpp"
 #include "excecution.hpp"
+#include "readin.hpp"
 
-unsigned char memory[0x20000];
-bool stop;
+using std::cout;
+
+bool stop, fake;
+int count;
+
+bool isBranch(int opcode) {
+	switch (opcode) {
+	case 0b1100011: case 0b1101111: case 0b1100111:
+		return true;
+	default:
+		return false;
+	}
+}
 
 void IF() {
+	int cond = XM_CD;
+	int opcode = get(0, 6, XM_IR);
+	int npc = XM_NPC;
+	
+	if (cond && isBranch(opcode)) {
+		pc = npc;
+	}
 	int a4 = memory[pc];
 	int a3 = memory[pc + 1];
 	int a2 = memory[pc + 2];
 	int a1 = memory[pc + 3];
-	FD_IR = link(a1, 4, a2, 4, a3, 4, a4, 4);
+	FD_IR = link(a1, 8, a2, 8, a3, 8, a4, 8);
+	if (FD_IR == 0x00c68223) stop = true;
 
 	pc = pc + 4;
 	FD_NPC = pc;
@@ -51,26 +72,37 @@ void MEM() {
 	int ao = XM_AO;
 	int npc = XM_NPC;
 
+	//printf("%d ", type);
+
+	int a1, a2, a3, a4, st;
 	switch (type) {
 	case 0: case 1: case 2: case 3: case 4:
-	case 5: case 6: case 7: case 8: case 16:
+	case 5: case 6: case 7: case 8: case 15: case 16:
 	case 17: case 18: case 19: case 20: case 21:
 	case 22: case 23: case 24: case 25: case 26:
 		MB_AO = ao;
 		break;
-	case 10: case 11: case 12: case 13: case 14: case 15:
-		MB_LMD = memory[ao];
+	case 10: case 11: case 12: case 13: case 14:
+		a4 = memory[ao];
+		a3 = memory[ao + 1];
+		a2 = memory[ao + 2];
+		a1 = memory[ao + 3];
+		MB_LMD = link(a1, 8, a2, 8, a3, 8, a4, 8);
 		break;
 	case 34: case 35: case 36:
-		memory[ao] = XM_B;
+		st = XM_B;
+		memory[ao] = get(0, 7, st);
+		memory[ao + 1] = get(8, 15, st);
+		memory[ao + 2] = get(16, 23, st);
+		memory[ao + 3] = get(24, 31, st);
 		break;
 	case 9: case 27: case 28: case 29:
 	case 30: case 31: case 32: case 33:
 		MB_AO = ao;
-		MB_NPC = npc;
 		break;
 	}
 	
+	MB_AO = ao;
 	MB_IR = XM_IR;
 	MB_TYPE = XM_TYPE;
 }
@@ -79,69 +111,74 @@ void WB() {
 	int type = MB_TYPE;
 	int ir = MB_IR;
 	int ao = MB_AO;
-	int npc = MB_NPC;
 	
 	int rd;
 	switch (type) {
 	case 0: case 1: case 2: case 3: case 4:
-	case 5: case 6: case 7: case 8: case 16:
+	case 5: case 6: case 7: case 8: case 15: case 16:
 	case 17: case 18: case 19: case 20: case 21:
 	case 22: case 23: case 24: case 25: case 26:
 		rd = get(7, 11, ir);
 		x[rd] = ao;
 		break;
-	case 10: case 11: case 12: case 13: case 14: case 15:
+	case 10: case 11: case 12: case 13: case 14:
 		rd = get(7, 11, ir);
-		x[rd] = ao;
+		x[rd] = MB_LMD;
 		break;
 	case 34: case 35: case 36:
 		break;
-	case 9: case 27: case 28: case 29:
-	case 30: case 31: case 32: case 33:
+	case 9: case 27: //JALR, JAL
+		rd = get(7, 11, ir);
+		x[rd] = ao;
+		break;
+	case 28: case 29:case 30: 
+	case 31: case 32: case 33:
 		break;
 	}
 }
 
-int getChar() {
-	while (1) {
-		char c = getchar();
-		if (c >= '0' && c <= '9') return c - '0';
-		if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-		if (c == '@') return 16;
-		if (c == EOF) return -1;
-	}
-}
-
-int get0x() {
-	int a, b;
-	a = getChar(); if (a == 16) return 256; if (a == -1) return -1;
-	b = getChar(); if (b == 16) throw 1; if (b == -1) throw 2;
-	return (a << 4) | b;
-}
-
-void fetch() {
-	int lab = get0x();
-
-	while (1) {
-		int loc; scanf("%x", &loc);
-		while (1) {
-			lab = get0x(); if (lab == 16) continue; if (lab == -1) return;
-			memory[loc++] = lab;
-		}
-	}
-}
+void display();
 
 int main() {
 	fetch();
 
 	stop = false;
-	while (!stop) {
-		IF();
+	pc = 0;
+
+	count = 0;
+	while (1) {
+		if (count == 21025) {
+			cout << "here!";
+			Sleep(9000);
+		}
+		IF(); if (stop) break;
 		ID();
-		EX();
+		EX(); 
 		MEM();
 		WB();
+		x[0] = 0;
+		count++;
+		//display();
 	}
-	std::cout << ((unsigned int)x[10] & 0b11111111);
-	//may cause problems
+	cout << ((unsigned int)x[10] & 255u);
+}
+
+
+
+void display() {
+	for (int i = 0; i < 32; ++i) {
+		int s[32];
+		int t = x[i];
+		for (int j = 0; j < 32; ++j) {
+			s[31 - j] = t % 2;
+			t /= 2;
+		}
+		if (i >= 0 && i <= 9) cout << "x[" << i << "]:  ";
+		else cout << "x[" << i << "]: ";
+		for (int j = 0; j < 32; ++j) {
+			cout << s[j];
+			if (j % 4 == 3) cout << ' ';
+		}
+		cout << std::endl;
+	}
 }
