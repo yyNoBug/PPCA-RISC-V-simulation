@@ -3,7 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <vector>
-#include <windows.h>
+//#include <windows.h>
 #include "storage.hpp"
 #include "ultility.hpp"
 #include "transcode.hpp"
