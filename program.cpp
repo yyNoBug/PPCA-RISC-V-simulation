@@ -10,6 +10,8 @@
 #include "excecution.hpp"
 #include "readin.hpp"
 
+//const int ccc = 20000000;
+
 using std::cout;
 
 bool stop, fake;
@@ -61,6 +63,10 @@ void EX() {
 	int _valb = DX_B;
 	int imm = DX_IMM;
 	int npc = DX_NPC;
+
+	//if (count >= ccc && count <= ccc + 10) printf("type %d\na %x\nb %x\nimm %x\n", DX_TYPE, DX_A, DX_B, DX_IMM);
+	int rd = get(7, 11, DX_IR);
+	//if (count >= ccc && count <= ccc + 10) printf("rd %d\n", rd);
 	
 	excecute(_vala, _valb, imm, npc, type);
 	XM_IR = DX_IR;
@@ -82,12 +88,30 @@ void MEM() {
 	case 22: case 23: case 24: case 25: case 26:
 		MB_AO = ao;
 		break;
-	case 10: case 11: case 12: case 13: case 14:
+	case 10: //LW 
 		a4 = memory[ao];
 		a3 = memory[ao + 1];
 		a2 = memory[ao + 2];
 		a1 = memory[ao + 3];
 		MB_LMD = link(a1, 8, a2, 8, a3, 8, a4, 8);
+		break;
+	case 11: //LH
+		a4 = memory[ao];
+		a3 = memory[ao + 1];
+		MB_LMD = ulink(a3, 8, a4, 8) << 16 >> 16;
+		break;
+	case 12: //LHU
+		a4 = memory[ao];
+		a3 = memory[ao + 1];
+		MB_LMD = ulink(a3, 8, a4, 8);
+		break;
+	case 13: //LB
+		a4 = memory[ao];
+		MB_LMD = a4 << 24 >> 24;
+		break;
+	case 14: //LBU
+		a4 = memory[ao];
+		MB_LMD = a4;
 		break;
 	case 34: case 35: case 36:
 		st = XM_B;
@@ -96,9 +120,10 @@ void MEM() {
 		memory[ao + 2] = get(16, 23, st);
 		memory[ao + 3] = get(24, 31, st);
 		break;
-	case 9: case 27: case 28: case 29:
-	case 30: case 31: case 32: case 33:
-		MB_AO = ao;
+	case 9: case 27: 
+		break;
+	case 28: case 29: case 30:
+	case 31: case 32: case 33:
 		break;
 	}
 	
@@ -147,18 +172,15 @@ int main() {
 
 	count = 0;
 	while (1) {
-		if (count == 21025) {
-			cout << "here!";
-			Sleep(9000);
-		}
+		count++;
+		//if (count >= ccc && count <= ccc + 10) printf("%d\n", count);
 		IF(); if (stop) break;
 		ID();
 		EX(); 
 		MEM();
 		WB();
 		x[0] = 0;
-		count++;
-		//display();
+		//if (count >= ccc && count <= ccc + 10) display();
 	}
 	cout << ((unsigned int)x[10] & 255u);
 }
@@ -168,17 +190,17 @@ int main() {
 void display() {
 	for (int i = 0; i < 32; ++i) {
 		int s[32];
-		int t = x[i];
+		unsigned int t = x[i];
 		for (int j = 0; j < 32; ++j) {
 			s[31 - j] = t % 2;
 			t /= 2;
 		}
-		if (i >= 0 && i <= 9) cout << "x[" << i << "]:  ";
-		else cout << "x[" << i << "]: ";
+		if (i >= 0 && i <= 9) printf("x[%d]:  ", i);
+		else printf("x[%d]: ", i);
 		for (int j = 0; j < 32; ++j) {
-			cout << s[j];
-			if (j % 4 == 3) cout << ' ';
+			printf("%d", s[j]);
+			if (j % 4 == 3) printf(" ");
 		}
-		cout << std::endl;
+		printf("\n");
 	}
 }

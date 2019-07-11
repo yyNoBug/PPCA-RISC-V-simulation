@@ -13,6 +13,10 @@ int link(int a, int la, int b, int lb) {
 	return (((a << lb) | b) << (32 - la - lb)) >> (32 - la - lb);
 }
 
+int ulink(int a, int la, int b, int lb) {
+	return ((a << lb) | b);
+}
+
 int link(int a, int la, int b, int lb, int c, int lc) {
 	return (((((a << lb) | b ) << lc) | c) << (32 - la - lb - lc)) >> (32 - la - lb - lc);
 }

@@ -46,7 +46,7 @@ public:
 		rd = get(7, 11, cod);
 		funct3 = get(12, 14, cod);
 		rs1 = get(15, 19, cod);
-		imm = get(20, 31, cod);
+		imm = get(20, 31, cod) << 20 >> 20;
 	}
 
 	virtual void getreg() {

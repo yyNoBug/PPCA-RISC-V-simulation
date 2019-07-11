@@ -111,6 +111,7 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 			XM_CD = 1;
 		}
 		else {
+			XM_NPC = npc;
 			XM_CD = 0;
 		}
 		break;
@@ -120,6 +121,7 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 			XM_CD = 1;
 		}
 		else {
+			XM_NPC = npc;
 			XM_CD = 0;
 		}
 		break;
@@ -129,6 +131,7 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 			XM_CD = 1;
 		}
 		else {
+			XM_NPC = npc;
 			XM_CD = 0;
 		}
 		break;
@@ -138,6 +141,7 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 			XM_CD = 1;
 		}
 		else {
+			XM_NPC = npc;
 			XM_CD = 0;
 		}
 		break;
@@ -147,6 +151,7 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 			XM_CD = 1;
 		}
 		else {
+			XM_NPC = npc;
 			XM_CD = 0;
 		}
 		break;
@@ -156,6 +161,7 @@ void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 			XM_CD = 1;
 		}
 		else {
+			XM_NPC = npc;
 			XM_CD = 0;
 		}
 		break;
