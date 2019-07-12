@@ -94,7 +94,7 @@ bool isBranch(int opcode) {
 	}
 }
 
-bool spjdge(int cur) {
+bool spjdg(int cur) {
     int opcode = get(0, 6, cur);
 
     switch (opcode) {

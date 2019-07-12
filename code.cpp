@@ -24,12 +24,12 @@ int main() {
 
 	fetch();
 
-	while (1) {
+	while (!stop) {
 		WB();
 		MEM();
 		EX();
 		ID();
-		IF(); if (stop) break;
+		IF();
 	}
 	WB();
 	MEM();
@@ -49,7 +49,7 @@ void IF() {
 	if (cond && isBranch(opcode)) {
 		pc = npc;
 		int rd = get(7, 11, DX.IR);
-		if (spjdge(DX.IR) && FD.IR == 0) {
+		if (spjdg(DX.IR) && FD.IR == 0) {
 		    lock[rd]--;
 		}
 		FD.IR = 0;
