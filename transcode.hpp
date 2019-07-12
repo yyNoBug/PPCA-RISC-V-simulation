@@ -85,5 +85,31 @@ _com* transcode(int cur) {
 	}
 }
 
+bool isBranch(int opcode) {
+	switch (opcode) {
+	case 0b1100011: case 0b1101111: case 0b1100111:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool spjdge(int cur) {
+    int opcode = get(0, 6, cur);
+
+    switch (opcode) {
+        case 0b0110111:
+        case 0b0010111:
+        case 0b1101111:
+        case 0b1100111:
+        case 0b0000011:
+        case 0b0110011:
+        case 0b0010011:
+            return true;
+        default:
+            return false;
+    }
+}
+
 
 #endif // !TRANSCODE
