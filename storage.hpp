@@ -15,37 +15,6 @@ int MB_IR, MB_TYPE, MB_AO, MB_LMD;
 
 short lock[32];
 
-int memcnt;
-
-void efd() {
-	FD_IR = 0;
-	FD_NPC = 0;
-}
-
-void edx() {
-	DX_IR = 0;
-	DX_NPC = 0;
-	DX_TYPE = 0;
-	DX_A = 0;
-	DX_B = 0;
-	DX_IMM = 0;
-}
-
-void exm() {
-	XM_IR = 0;
-	XM_NPC = 0;
-	XM_TYPE = 0;
-	XM_B = 0;
-	XM_AO = 0;
-	XM_CD = 0;
-}
-
-void emb() {
-	MB_IR = 0;
-	MB_TYPE = 0;
-	MB_AO = 0;
-	MB_LMD = 0;
-}
 
 /*
 struct FD {

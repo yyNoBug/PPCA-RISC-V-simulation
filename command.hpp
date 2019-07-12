@@ -36,9 +36,6 @@ public:
 		DX_IMM = 0;
 		DX_TYPE = type;
 		lock[rd]++;
-//        if (rd == 1) {
-//            printf("plus ID %x\n", FD_IR);
-//        }
 		return true;
 	}
 };
@@ -62,9 +59,6 @@ public:
 		DX_IMM = imm;
 		DX_TYPE = type;
 		lock[rd]++;
-//        if (rd == 1) {
-//            printf("plus ID %x\n", FD_IR);
-//        }
 		return true;
 	}
 };
@@ -131,9 +125,6 @@ public:
 		DX_IMM = imm;
 		DX_TYPE = type;
 		lock[rd]++;
-//        if (rd == 1) {
-//            printf("plus ID %x\n", FD_IR);
-//        }
 		return true;
 	}
 };
@@ -155,9 +146,6 @@ public:
 		DX_IMM = imm;
 		DX_TYPE = type;
 		lock[rd]++;
-//        if (rd == 1) {
-//            printf("plus ID %x\n", FD_IR);
-//        }
 		return true;
 	}
 };

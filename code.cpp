@@ -11,7 +11,8 @@
 
 using std::cout;
 
-bool stop, fake;
+bool stop;
+int memcnt;
 
 void IF();
 void ID();
