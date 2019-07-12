@@ -1,5 +1,17 @@
-PROJECT(code)
-set(CMAKE_CXX_FLAGS "-O2")
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-ADD_EXECUTABLE(code ${DIR_SRCS})
+cmake_minimum_required(VERSION 3.14)
+project(myProgram)
+
+set(CMAKE_CXX_STANDARD 14)
+
+include_directories(.)
+
+add_executable(code
+        code.cpp
+        command.hpp
+        enum.hpp
+        excecution.hpp
+        readin.hpp
+        storage.hpp
+        transcode.hpp
+        ultility.hpp
+        )

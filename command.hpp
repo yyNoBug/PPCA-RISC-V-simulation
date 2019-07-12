@@ -11,8 +11,8 @@ class _com {
 public:
 	_com(int _opcode) :opcode(_opcode) {}
 
-	virtual void getreg() {
-		return;
+	virtual bool getreg() {
+		return true;
 	}
 };
 
@@ -29,11 +29,17 @@ public:
 		funct7 = get(25, 31, cod);
 	}
 
-	virtual void getreg() {
+	virtual bool getreg() {
+		if (lock[rs1] || lock[rs2]) return false;
 		DX_A = x[rs1];
 		DX_B = x[rs2];
 		DX_IMM = 0;
 		DX_TYPE = type;
+		lock[rd]++;
+//        if (rd == 1) {
+//            printf("plus ID %x\n", FD_IR);
+//        }
+		return true;
 	}
 };
 
@@ -49,11 +55,17 @@ public:
 		imm = get(20, 31, cod) << 20 >> 20;
 	}
 
-	virtual void getreg() {
+	virtual bool getreg() {
+		if (lock[rs1]) return false;
 		DX_A = x[rs1];
 		DX_B = 0;
 		DX_IMM = imm;
 		DX_TYPE = type;
+		lock[rd]++;
+//        if (rd == 1) {
+//            printf("plus ID %x\n", FD_IR);
+//        }
+		return true;
 	}
 };
 
@@ -69,11 +81,13 @@ public:
 		imm = link(get(25, 31, cod), 7, get(7, 11, cod), 5);
 	}
 
-	virtual void getreg() {
+	virtual bool getreg() {
+		if (lock[rs1] || lock[rs2]) return false;
 		DX_A = x[rs1];
 		DX_B = x[rs2];
 		DX_IMM = imm;
 		DX_TYPE = type;
+		return true;
 	}
 };
 
@@ -90,11 +104,13 @@ public:
 		imm = imm << 1;
 	}
 
-	virtual void getreg() {
+	virtual bool getreg() {
+		if (lock[rs1] || lock[rs2]) return false;
 		DX_A = x[rs1];
 		DX_B = x[rs2];
 		DX_IMM = imm;
 		DX_TYPE = type;
+		return true;
 	}
 };
 
@@ -109,11 +125,16 @@ public:
 		imm = imm << 12;
 	}
 
-	virtual void getreg() {
+	virtual bool getreg() {
 		DX_A = 0;
 		DX_B = 0;
 		DX_IMM = imm;
 		DX_TYPE = type;
+		lock[rd]++;
+//        if (rd == 1) {
+//            printf("plus ID %x\n", FD_IR);
+//        }
+		return true;
 	}
 };
 
@@ -128,11 +149,16 @@ public:
 		imm = imm << 1;
 	}
 
-	virtual void getreg() {
+	virtual bool getreg() {
 		DX_A = 0;
 		DX_B = 0;
 		DX_IMM = imm;
 		DX_TYPE = type;
+		lock[rd]++;
+//        if (rd == 1) {
+//            printf("plus ID %x\n", FD_IR);
+//        }
+		return true;
 	}
 };
 

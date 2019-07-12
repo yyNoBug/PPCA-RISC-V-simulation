@@ -26,6 +26,23 @@ bool isBranch(int opcode) {
 	}
 }
 
+bool spjdge(int cur) {
+    int opcode = get(0, 6, cur);
+
+    switch (opcode) {
+        case 0b0110111:
+        case 0b0010111:
+        case 0b1101111:
+        case 0b1100111:
+        case 0b0000011:
+        case 0b0110011:
+        case 0b0010011:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void IF() {
 	int cond = XM_CD;
 	int opcode = get(0, 6, XM_IR);
@@ -33,7 +50,25 @@ void IF() {
 	
 	if (cond && isBranch(opcode)) {
 		pc = npc;
+		int rd = get(7, 11, DX_IR);
+		if (spjdge(DX_IR) && FD_IR == 0) {
+		    lock[rd]--;
+            /*if (rd == 1) {
+                printf("minus IF %x\n", DX_IR);
+            }*/
+		}
+		/*if (lock[rd] < 0) {
+			cout << "NONONO";
+			Sleep(5000);
+		}*/
+		FD_IR = 0;
+		DX_IR = 0;
+		count--;
 	}
+
+	if (FD_IR) return;
+	count++;
+
 	int a4 = memory[pc];
 	int a3 = memory[pc + 1];
 	int a2 = memory[pc + 2];
@@ -47,17 +82,25 @@ void IF() {
 
 
 void ID() {
+	if (!FD_IR || DX_IR) return;
 	int ir = FD_IR;
 	
 	_com* x = transcode(ir);
-	x->getreg(); 
+	if (!x->getreg()) {
+		delete x;
+		return;
+	}
 	delete x;
 
 	DX_IR = FD_IR;
 	DX_NPC = FD_NPC;
+
+	FD_IR = 0;
 }
 
 void EX() {
+	if (!DX_IR || XM_IR) return;
+	
 	int type = DX_TYPE;
 	int _vala = DX_A;
 	int _valb = DX_B;
@@ -65,19 +108,35 @@ void EX() {
 	int npc = DX_NPC;
 
 	//if (count >= ccc && count <= ccc + 10) printf("type %d\na %x\nb %x\nimm %x\n", DX_TYPE, DX_A, DX_B, DX_IMM);
-	int rd = get(7, 11, DX_IR);
+	//int rd = get(7, 11, DX_IR);
 	//if (count >= ccc && count <= ccc + 10) printf("rd %d\n", rd);
 	
 	excecute(_vala, _valb, imm, npc, type);
 	XM_IR = DX_IR;
 	XM_TYPE = DX_TYPE;
+
+	DX_IR = 0;
 }
 
 void MEM() {
+	if (!XM_IR || MB_IR) return;
+
+	switch (memcnt) {
+	case 2:
+		memcnt--;
+		return;
+	case 1:
+		MB_IR = XM_IR;
+		MB_AO = XM_AO;
+		MB_TYPE = XM_TYPE;
+		XM_IR = 0;
+		
+		memcnt--;
+		return;
+	}
+
 	int type = XM_TYPE;
 	int ao = XM_AO;
-	int npc = XM_NPC;
-
 	//printf("%d ", type);
 
 	int a1, a2, a3, a4, st;
@@ -86,7 +145,6 @@ void MEM() {
 	case 5: case 6: case 7: case 8: case 15: case 16:
 	case 17: case 18: case 19: case 20: case 21:
 	case 22: case 23: case 24: case 25: case 26:
-		MB_AO = ao;
 		break;
 	case 10: //LW 
 		a4 = memory[ao];
@@ -94,84 +152,131 @@ void MEM() {
 		a2 = memory[ao + 2];
 		a1 = memory[ao + 3];
 		MB_LMD = link(a1, 8, a2, 8, a3, 8, a4, 8);
-		break;
+		memcnt = 2;
+		return;
 	case 11: //LH
 		a4 = memory[ao];
 		a3 = memory[ao + 1];
 		MB_LMD = ulink(a3, 8, a4, 8) << 16 >> 16;
-		break;
+		memcnt = 2;
+		return;
 	case 12: //LHU
 		a4 = memory[ao];
 		a3 = memory[ao + 1];
 		MB_LMD = ulink(a3, 8, a4, 8);
-		break;
+		memcnt = 2;
+		return;
 	case 13: //LB
 		a4 = memory[ao];
 		MB_LMD = a4 << 24 >> 24;
-		break;
+		memcnt = 2;
+		return;
 	case 14: //LBU
 		a4 = memory[ao];
 		MB_LMD = a4;
-		break;
+		memcnt = 2;
+		return;
 	case 34: case 35: case 36:
 		st = XM_B;
 		memory[ao] = get(0, 7, st);
 		memory[ao + 1] = get(8, 15, st);
 		memory[ao + 2] = get(16, 23, st);
 		memory[ao + 3] = get(24, 31, st);
-		break;
+		memcnt = 2;
+		return;
 	case 9: case 27: 
 		break;
 	case 28: case 29: case 30:
 	case 31: case 32: case 33:
 		break;
 	}
-	
-	MB_AO = ao;
+
 	MB_IR = XM_IR;
+	MB_AO = ao;
 	MB_TYPE = XM_TYPE;
+	
+	XM_IR = 0;
 }
 
 void WB() {
+	if (!MB_IR) return;
+	
 	int type = MB_TYPE;
 	int ir = MB_IR;
 	int ao = MB_AO;
 	
 	int rd;
+	rd = get(7, 11, ir);
 	switch (type) {
 	case 0: case 1: case 2: case 3: case 4:
 	case 5: case 6: case 7: case 8: case 15: case 16:
 	case 17: case 18: case 19: case 20: case 21:
 	case 22: case 23: case 24: case 25: case 26:
-		rd = get(7, 11, ir);
 		x[rd] = ao;
+		lock[rd]--;
+//		if (rd == 1) {
+//		    cout << "minus WB" << '\n';
+//		}
 		break;
 	case 10: case 11: case 12: case 13: case 14:
-		rd = get(7, 11, ir);
 		x[rd] = MB_LMD;
+		lock[rd]--;
+//		if (rd == 1) {
+//		    cout << "minus WB" << '\n';
+//		}
 		break;
 	case 34: case 35: case 36:
 		break;
 	case 9: case 27: //JALR, JAL
-		rd = get(7, 11, ir);
 		x[rd] = ao;
+		lock[rd]--;
+//		if (rd == 1) {
+//		    printf("minus WB %x\n", MB_IR);
+//		}
 		break;
 	case 28: case 29:case 30: 
 	case 31: case 32: case 33:
 		break;
 	}
+
+	/*if (lock[rd] < 0) {
+		cout << "NONONO";
+		Sleep(5000);
+	}*/
+	//lock[0] = 0;
+	x[0] = 0;
+	MB_IR = 0;
 }
 
 void display();
 
 int main() {
+    //freopen("array_test1.data", "r", stdin);
 	fetch();
 
 	stop = false;
 	pc = 0;
 
 	count = 0;
+	int cnt = 0;
 	while (1) {
+		//count++;
+		WB();
+		MEM();
+		EX();
+		ID();
+		IF(); if (stop) break;
+		//printf("%4d %9x %9x %9x %9x\n", count, FD_IR, DX_IR, XM_IR, MB_IR);
+
+		++cnt;
+		//if (cnt >= 8000) exit(1);
+		/*for (int i = 0; i < 32; ++i) {
+			std::cout << lock[i];
+		}
+ 		std::cout << std::endl;*/
+	}
+
+	/*while (1) {
 		count++;
 		//if (count >= ccc && count <= ccc + 10) printf("%d\n", count);
 		IF(); if (stop) break;
@@ -181,11 +286,16 @@ int main() {
 		WB();
 		x[0] = 0;
 		//if (count >= ccc && count <= ccc + 10) display();
-	}
+	}*/
+
+	WB();
+	MEM();
+	EX();
+	WB();
+	MEM();
+	WB();
 	cout << ((unsigned int)x[10] & 255u);
 }
-
-
 
 void display() {
 	for (int i = 0; i < 32; ++i) {

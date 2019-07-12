@@ -80,6 +80,8 @@ _com* transcode(int cur) {
 			case 0b0100000: return new _com_I(cur, SRAI);
 			}
 		}
+	default:
+		return new _com(0);
 	}
 }
 
