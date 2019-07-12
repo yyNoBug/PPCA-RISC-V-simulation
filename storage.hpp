@@ -5,32 +5,22 @@ unsigned char memory[0x20000];
 
 int x[32], pc;
 
-int FD_IR, FD_NPC;
-
-int DX_IR, DX_NPC, DX_TYPE, DX_A, DX_B, DX_IMM;
-
-int XM_IR, XM_NPC, XM_TYPE, XM_B, XM_AO, XM_CD;
-
-int MB_IR, MB_TYPE, MB_AO, MB_LMD;
-
 short lock[32];
 
-
-/*
-struct FD {
+struct regFD {
 	int IR, NPC;
-};
+} FD;
 
-struct DX {
+struct regDX {
 	int IR, NPC, A, B, imm, type;
-};
+} DX;
 
-struct XM {
-	int IR, NPC, AluOutput, cond, type;
-};
+struct regXM {
+	int IR, NPC, B, AluOutput, cond, type;
+} XM;
 
-struct MB {
-	int IR, NPC, AluOutput, cond, LMD;
-};*/
+struct regMB {
+	int IR, NPC, AluOutput, cond, type, LMD;
+} MB;
 
 #endif // !STORAGE

@@ -31,10 +31,10 @@ public:
 
 	virtual bool getreg() {
 		if (lock[rs1] || lock[rs2]) return false;
-		DX_A = x[rs1];
-		DX_B = x[rs2];
-		DX_IMM = 0;
-		DX_TYPE = type;
+		DX.A = x[rs1];
+		DX.B = x[rs2];
+		DX.imm = 0;
+		DX.type = type;
 		lock[rd]++;
 		return true;
 	}
@@ -54,10 +54,10 @@ public:
 
 	virtual bool getreg() {
 		if (lock[rs1]) return false;
-		DX_A = x[rs1];
-		DX_B = 0;
-		DX_IMM = imm;
-		DX_TYPE = type;
+		DX.A = x[rs1];
+		DX.B = 0;
+		DX.imm = imm;
+		DX.type = type;
 		lock[rd]++;
 		return true;
 	}
@@ -77,10 +77,10 @@ public:
 
 	virtual bool getreg() {
 		if (lock[rs1] || lock[rs2]) return false;
-		DX_A = x[rs1];
-		DX_B = x[rs2];
-		DX_IMM = imm;
-		DX_TYPE = type;
+		DX.A = x[rs1];
+		DX.B = x[rs2];
+		DX.imm = imm;
+		DX.type = type;
 		return true;
 	}
 };
@@ -100,10 +100,10 @@ public:
 
 	virtual bool getreg() {
 		if (lock[rs1] || lock[rs2]) return false;
-		DX_A = x[rs1];
-		DX_B = x[rs2];
-		DX_IMM = imm;
-		DX_TYPE = type;
+		DX.A = x[rs1];
+		DX.B = x[rs2];
+		DX.imm = imm;
+		DX.type = type;
 		return true;
 	}
 };
@@ -120,10 +120,10 @@ public:
 	}
 
 	virtual bool getreg() {
-		DX_A = 0;
-		DX_B = 0;
-		DX_IMM = imm;
-		DX_TYPE = type;
+		DX.A = 0;
+		DX.B = 0;
+		DX.imm = imm;
+		DX.type = type;
 		lock[rd]++;
 		return true;
 	}
@@ -141,10 +141,10 @@ public:
 	}
 
 	virtual bool getreg() {
-		DX_A = 0;
-		DX_B = 0;
-		DX_IMM = imm;
-		DX_TYPE = type;
+		DX.A = 0;
+		DX.B = 0;
+		DX.imm = imm;
+		DX.type = type;
 		lock[rd]++;
 		return true;
 	}
