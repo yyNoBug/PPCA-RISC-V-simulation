@@ -15,7 +15,6 @@ bool stop;
 int memcnt;
 
 void IF();
-void jIF();
 void ID();
 void EX();
 void MEM();
@@ -33,8 +32,7 @@ int main() {
 		MEM();
 		EX();
 		ID();
-		jIF();
-		//printf("%d\n%08x  %08x  %08x  %08x\n", count, FD.IR, DX.IR, XM.IR, MB.IR);
+		IF();
 		//display();
 	}
 	WB();
@@ -45,40 +43,19 @@ int main() {
 	WB();
 
 	cout << ((unsigned int)x[10] & 255u);
+	pred.ACC();
 }
 
 void IF() {
 	int cond = XM.cond;
 	int npc = XM.NPC;
-
-	if (cond && isBranch(XM.IR)) {
-		pc = npc;
-		if (spjdg(DX.IR) && FD.IR == 0) {
-			int rd = get(7, 11, DX.IR);
-			lock[rd]--;
-		}
-		FD.IR = 0;
-		DX.IR = 0;
+	int jump = XM.jump;
+	
+	if (isB(XM.IR) || isJ(XM.IR)) {
+		pred.update(XM.NPC - 4, cond);
 	}
-
-	if (FD.IR) return;
-
-	int a4 = memory[pc];
-	int a3 = memory[pc + 1];
-	int a2 = memory[pc + 2];
-	int a1 = memory[pc + 3];
-	FD.IR = link(a1, 8, a2, 8, a3, 8, a4, 8);
-	if (FD.IR == 0x00c68223) stop = true;
-
-	pc = pc + 4;
-	FD.NPC = pc;
-}
-
-void jIF() {
-	int cond = XM.cond;
-	int npc = XM.NPC;
-
-	if ((!cond && isB(XM.IR)) || isJR(XM.IR)) {
+	
+	if (!jump &&(cond && isBranch(XM.IR)) || (jump && (!cond && isB(XM.IR)) || isJR(XM.IR))) {
 		pc = npc;
 		if (spjdg(DX.IR) && FD.IR == 0) {
 			int rd = get(7, 11, DX.IR);
@@ -98,19 +75,28 @@ void jIF() {
 	if (FD.IR == 0x00c68223) stop = true;
 
 	FD.NPC = pc + 4;
-	int tmp = FD.IR;
-	int imm;
-	if (isB(tmp)) {
-		imm = link(get(31, 31, tmp), 1, get(7, 7, tmp), 1, get(25, 30, tmp), 6, get(8, 11, tmp), 4);
-		imm = imm << 1;
-		pc = pc + imm;
+
+	if (pred.judge(pc)) {
+		int tmp = FD.IR;
+		int imm;
+		if (isB(tmp)) {
+			imm = link(get(31, 31, tmp), 1, get(7, 7, tmp), 1, get(25, 30, tmp), 6, get(8, 11, tmp), 4);
+			imm = imm << 1;
+			pc = pc + imm;
+		}
+		else if (isJ(tmp)) {
+			imm = link(get(31, 31, tmp), 1, get(12, 19, tmp), 8, get(20, 20, tmp), 1, get(21, 30, tmp), 10);
+			imm = imm << 1;
+			pc = pc + imm;
+		}
+		else pc = pc + 4;
+		FD.jump = true;
 	}
-	else if (isJ(tmp)) {
-		imm = link(get(31, 31, tmp), 1, get(12, 19, tmp), 8, get(20, 20, tmp), 1, get(21, 30, tmp), 10);
-		imm = imm << 1;
-		pc = pc + imm;
+	else {
+		pc = pc + 4;
+		FD.jump = false;
 	}
-	else pc = pc + 4;
+
 }
 
 void ID() {
@@ -126,6 +112,7 @@ void ID() {
 
 	DX.IR = FD.IR;
 	DX.NPC = FD.NPC;
+	DX.jump = FD.jump;
 
 	FD.IR = 0;
 }
@@ -142,6 +129,7 @@ void EX() {
 	excecute(_vala, _valb, imm, npc, type);
 	XM.IR = DX.IR;
 	XM.type = DX.type;
+	XM.jump = DX.jump;
 
 	DX.IR = 0;
 }
