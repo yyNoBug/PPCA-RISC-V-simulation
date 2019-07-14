@@ -7,18 +7,17 @@ unsigned char memory[0x20000];
 
 int x[32], pc;
 
-
 struct predictor {
-	short data[256];
+	short data[4096];
 	int all, corr;
 	bool judge(int addr) {
-		int tmp = get(0, 7, addr);
+		int tmp = get(0, 11, addr);
 		if (data[tmp] >= 2) return 1;
 		else return 0;
 	}
 
 	void update(int addr, bool jump) {
-		int tmp = get(0, 7, addr);
+		int tmp = get(0, 11, addr);
 		++all;
 		if (jump == judge(addr))
 			++corr;

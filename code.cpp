@@ -51,8 +51,8 @@ void IF() {
 	int npc = XM.NPC;
 	int jump = XM.jump;
 	
-	if (isB(XM.IR) || isJ(XM.IR)) {
-		pred.update(XM.NPC - 4, cond);
+	if (isB(XM.IR)) {
+		if (!FD.IR) pred.update(XM.NPC - 4, cond);
 	}
 	
 	if (!jump &&(cond && isBranch(XM.IR)) || (jump && (!cond && isB(XM.IR)) || isJR(XM.IR))) {
