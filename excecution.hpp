@@ -6,9 +6,9 @@
 
 void excecute(int _vala, int _valb, int imm, int npc, int typeofcode) {
 
-	int rd = get(7, 11, DX.IR);  //there may be problems
+	int rd = get(7, 11, DX.IR);
 	int shift;
-	
+
 	switch (typeofcode) {
 	case 0: //ADDI
 		XM.AluOutput = _vala + imm;

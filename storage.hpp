@@ -23,4 +23,6 @@ struct regMB {
 	int IR, NPC, AluOutput, cond, type, LMD;
 } MB;
 
+
+
 #endif // !STORAGE

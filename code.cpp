@@ -15,10 +15,14 @@ bool stop;
 int memcnt;
 
 void IF();
+void jIF();
 void ID();
 void EX();
 void MEM();
 void WB();
+void display();
+
+int count;
 
 int main() {
 
@@ -29,7 +33,9 @@ int main() {
 		MEM();
 		EX();
 		ID();
-		IF();
+		jIF();
+		//printf("%d\n%08x  %08x  %08x  %08x\n", count, FD.IR, DX.IR, XM.IR, MB.IR);
+		//display();
 	}
 	WB();
 	MEM();
@@ -43,14 +49,13 @@ int main() {
 
 void IF() {
 	int cond = XM.cond;
-	int opcode = get(0, 6, XM.IR);
 	int npc = XM.NPC;
 
-	if (cond && isBranch(opcode)) {
+	if (cond && isBranch(XM.IR)) {
 		pc = npc;
-		int rd = get(7, 11, DX.IR);
 		if (spjdg(DX.IR) && FD.IR == 0) {
-		    lock[rd]--;
+			int rd = get(7, 11, DX.IR);
+			lock[rd]--;
 		}
 		FD.IR = 0;
 		DX.IR = 0;
@@ -69,6 +74,44 @@ void IF() {
 	FD.NPC = pc;
 }
 
+void jIF() {
+	int cond = XM.cond;
+	int npc = XM.NPC;
+
+	if ((!cond && isB(XM.IR)) || isJR(XM.IR)) {
+		pc = npc;
+		if (spjdg(DX.IR) && FD.IR == 0) {
+			int rd = get(7, 11, DX.IR);
+			lock[rd]--;
+		}
+		FD.IR = 0;
+		DX.IR = 0;
+	}
+
+	if (FD.IR) return;
+
+	int a4 = memory[pc];
+	int a3 = memory[pc + 1];
+	int a2 = memory[pc + 2];
+	int a1 = memory[pc + 3];
+	FD.IR = link(a1, 8, a2, 8, a3, 8, a4, 8);
+	if (FD.IR == 0x00c68223) stop = true;
+
+	FD.NPC = pc + 4;
+	int tmp = FD.IR;
+	int imm;
+	if (isB(tmp)) {
+		imm = link(get(31, 31, tmp), 1, get(7, 7, tmp), 1, get(25, 30, tmp), 6, get(8, 11, tmp), 4);
+		imm = imm << 1;
+		pc = pc + imm;
+	}
+	else if (isJ(tmp)) {
+		imm = link(get(31, 31, tmp), 1, get(12, 19, tmp), 8, get(20, 20, tmp), 1, get(21, 30, tmp), 10);
+		imm = imm << 1;
+		pc = pc + imm;
+	}
+	else pc = pc + 4;
+}
 
 void ID() {
 	if (!FD.IR || DX.IR) return;
@@ -180,6 +223,8 @@ void MEM() {
 void WB() {
 	if (!MB.IR) return;
 
+	count++;
+
 	int type = MB.type;
 	int ir = MB.IR;
 	int ao = MB.AluOutput;
@@ -213,7 +258,7 @@ void WB() {
 	MB.IR = 0;
 }
 
-/* void display() {
+void display() {
 	for (int i = 0; i < 32; ++i) {
 		int s[32];
 		unsigned int t = x[i];
@@ -229,4 +274,4 @@ void WB() {
 		}
 		printf("\n");
 	}
-}*/
+}

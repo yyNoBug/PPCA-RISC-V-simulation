@@ -85,7 +85,8 @@ _com* transcode(int cur) {
 	}
 }
 
-bool isBranch(int opcode) {
+bool isBranch(int command) {
+	int opcode = get(0, 6, command);
 	switch (opcode) {
 	case 0b1100011: case 0b1101111: case 0b1100111:
 		return true;
@@ -94,8 +95,38 @@ bool isBranch(int opcode) {
 	}
 }
 
-bool spjdg(int cur) {
-    int opcode = get(0, 6, cur);
+bool isB(int command) {
+	int opcode = get(0, 6, command);
+	switch (opcode) {
+	case 0b1100011:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool isJ(int command) {
+	int opcode = get(0, 6, command);
+	switch (opcode) {
+	case 0b1101111:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool isJR(int command) {
+	int opcode = get(0, 6, command);
+	switch (opcode) {
+	case 0b1100111:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool spjdg(int command) {
+    int opcode = get(0, 6, command);
 
     switch (opcode) {
         case 0b0110111:
